@@ -1,7 +1,6 @@
 <template>
-    <div>
-      <h1>Home Page</h1>
-      <p>Welcome to the home page!</p>
-    </div>
+  <Home></Home>
   </template>
-  
+  <script setup>
+  import Home from '@/components/Home.vue';
+  </script>

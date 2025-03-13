@@ -1,4 +1,5 @@
 <template>
+  <Default>
     <ul>
         <input v-model="items.name" placeholder="Add item" />
         <p>this fruit is called a, {{ items.name }}</p>
@@ -7,10 +8,12 @@
       <!-- <li v-for="(item, index) in items" :key="index">{{ item }}</li> -->
       <!-- <p v-if="items.length === 0">No items found</p> -->
     </ul>
+  </Default>
   </template>
   
   <script setup>
   import { ref } from "vue";
+  import Default from "../layouts/Default.vue";
     import { reactive } from "vue";
   
   const items = reactive({name: "apple"});
