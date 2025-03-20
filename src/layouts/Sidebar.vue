@@ -1,83 +1,144 @@
 <template>
-    <div :class="['sidebar', { open: isSidebarOpen }]">
-      <button class="btn btn-outline-light close-btn" @click="toggleSidebar">
-        <i class="bi bi-x-lg"></i>
-      </button>
-      <ul class="list-unstyled mt-4">
-        <li>
-          <router-link class="sidebar-link" to="/home">
-            <i class="bi bi-house-door"></i> Home
-          </router-link>
-        </li>
-        <li>
-          <router-link class="sidebar-link" to="/about">
-            <i class="bi bi-info-circle"></i> About
-          </router-link>
-        </li>
-        <li>
-          <router-link class="sidebar-link" to="/food">
-            <i class="bi bi-egg-fried"></i> Food
-          </router-link>
-        </li>
-        <li>
-          <router-link class="sidebar-link" to="/props">
-            <i class="bi bi-danger=circle"></i> props
-          </router-link>
-        </li>
-      </ul>
-    </div>
-  </template>
-  
-  <script setup>
-  import { ref, defineExpose } from "vue";
+  <div :class="['sidebar', { open: isSidebarOpen }]">
+    <button class="btn btn-outline-light close-btn" @click="toggleSidebar">
+      <i class="bi bi-x-lg"></i>
+    </button>
 
-  
-  const isSidebarOpen = ref(false);
-  
-  function toggleSidebar() {
-    isSidebarOpen.value = !isSidebarOpen.value;
-  }
-  
-  // Expose the function so the parent can call it
-  defineExpose({ toggleSidebar });
-  </script>
-  
-  <style scoped>
-  /* Sidebar Styles */
-  .sidebar {
-    position: fixed;
-    left: -250px;
-    top: 0;
-    width: 250px;
-    height: 100%;
-    background: #343a40;
-    color: white;
-    padding: 20px;
-    transition: left 0.3s ease-in-out;
-    z-index: 999;
-  }
-  
-  .sidebar.open {
-    left: 0;
-  }
-  
-  .sidebar-link {
-    color: white;
-    text-decoration: none;
-    display: block;
-    padding: 10px;
-    font-size: 18px;
-  }
-  
-  .sidebar-link:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-  
-  /* Sidebar Close Button */
-  .close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-  }
-  </style>
-  
+    <ul class="list-unstyled mt-4">
+     
+
+      <!-- 🔻 Dropdown for Vue Concepts -->
+      <li>
+        <button class="sidebar-link dropdown-btn" @click="toggleDropdown">
+          <i class="bi bi-book"></i> Vue Topics
+          <i :class="['bi', isDropdownOpen ? 'bi-caret-down-fill' : 'bi-caret-right-fill']"></i>
+        </button>
+
+        <ul v-if="isDropdownOpen" class="dropdown-list">
+          <li>
+            <router-link class="sidebar-link" to="/props">
+              <i class="bi bi-arrow-right-circle"></i> Props
+            </router-link>
+          </li>
+          <li>
+            <router-link class="sidebar-link" to="/emit">
+              <i class="bi bi-arrow-right-circle"></i> Emit
+            </router-link>
+          </li>
+          <li>
+            <router-link class="sidebar-link" to="/computed">
+              <i class="bi bi-arrow-right-circle"></i> Computed
+            </router-link>
+          </li>
+          <li>
+            <router-link class="sidebar-link" to="/watch">
+              <i class="bi bi-arrow-right-circle"></i> Watch
+            </router-link>
+          </li>
+          <li>
+            <router-link class="sidebar-link" to="/mount">
+              <i class="bi bi-arrow-right-circle"></i> onMounted
+            </router-link>
+          </li>
+          <li>
+            <router-link class="sidebar-link" to="/users/2">
+              <i class="bi bi-arrow-right-circle"></i> API Fetch (Users)
+            </router-link>
+          </li>
+       
+        </ul>
+        <li>
+            <router-link class="sidebar-link" to="/banners">
+              <i class="bi bi-arrow-right-book"></i> Banners
+            </router-link>
+          </li>
+      </li>
+    </ul>
+  </div>
+</template>
+
+<script setup>
+import { ref, defineExpose } from "vue";
+
+const isSidebarOpen = ref(true); // Sidebar remains open by default
+const isDropdownOpen = ref(false); // Dropdown starts closed
+
+// Toggle entire sidebar
+function toggleSidebar() {
+  isSidebarOpen.value = !isSidebarOpen.value;
+}
+
+// Toggle dropdown
+function toggleDropdown() {
+  isDropdownOpen.value = !isDropdownOpen.value;
+}
+
+// Allow parent to call `toggleSidebar`
+defineExpose({ toggleSidebar });
+</script>
+
+<style scoped>
+/* Sidebar Styles */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 220px; /* Reduced size */
+  height: 100%;
+  background: #010911;
+  color: white;
+  padding: 15px;
+  transition: transform 0.3s ease-in-out;
+  z-index: 999;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+/* Sidebar Links */
+.sidebar-link {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Dropdown Button */
+.dropdown-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.dropdown-list {
+  padding-left: 15px;
+  margin-top: 5px;
+}
+
+/* Sidebar Close Button */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* Icons */
+.bi {
+  font-size: 14px;
+}
+</style>

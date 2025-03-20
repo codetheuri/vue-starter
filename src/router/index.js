@@ -33,7 +33,49 @@ const routes = [
     path: "/props",
     component: () => import("@/views/Props.vue"),
     meta: { requiresAuth: true }
-  }
+  },
+  {
+    path: "/emit",
+    component: () => import("@/views/Emit.vue"),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/computed",
+    component: () => import("@/views/Shop.vue"),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/watch",
+    component: () => import("@/views/Temp.vue"),
+    meta: { requiresAuth: true }
+  }, 
+  {
+    path: "/mount",
+    component: () => import("@/views/Mount.vue"),
+    alias:"/mm",
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/users/:id",
+    component: () => import("@/views/Users.vue"),
+
+    meta: { requiresAuth: true },
+    children:[
+      {
+        path: "profile",
+        // component: () => import("@/views/Profile.vue"),
+      },
+      {
+        path: "settings",
+        component: () => import("@/views/UserSettings.vue"),
+      }
+    ]
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    component: () => import("@/views/NotFound.vue")
+
+  },
 ];
 
 const router = createRouter({

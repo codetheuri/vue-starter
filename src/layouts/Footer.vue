@@ -7,6 +7,7 @@
 </template>
 <style>
 .footer {
+  background-color: #010911;
   position: fixed;
   width: 100%;
   z-index: 100;

@@ -15,7 +15,7 @@ function handleMessage(newMessage){
             <h2>child to parent communication </h2>
             <p><strong>Received Message:</strong>{{ UserMessage }}</p>
 
-            <inputBox @updateMessage="handleMessage" />
+            <Input @updateMessage="handleMessage" />
         </div>
     </Default>
 </template>
