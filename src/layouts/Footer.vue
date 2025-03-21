@@ -1,5 +1,5 @@
 <template>
-    <footer class="footer bg-dark text-white text-center py-2 ">
+    <footer class="footer bg-white text-dark text-center  ">
       <p class="mb-3">
         <i class="bi bi-c-circle"></i> 2025 My Vue App. All Rights Reserved.
       </p>
@@ -7,10 +7,12 @@
 </template>
 <style>
 .footer {
-  background-color: #010911;
+  background-color: #ffffff;
   position: fixed;
+  padding-bottom: 0px;
   width: 100%;
   z-index: 100;
+
   bottom: 0;
   left: 0;
 

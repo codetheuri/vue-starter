@@ -76,6 +76,11 @@ const routes = [
     component: () => import("@/views/NotFound.vue")
 
   },
+  {
+    path: "/banners",
+    component: () => import("@/views/banners/Banners.vue"),
+    meta: { requiresAuth: true }
+  }
 ];
 
 const router = createRouter({

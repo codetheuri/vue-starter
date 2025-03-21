@@ -1,15 +1,15 @@
 <template>
-  <div class="app-layout">
+  <div class="app-layout" :class="{ 'sidebar-open': sidebarOpen }">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
       <div class="container-fluid">
         <!-- Sidebar Toggle Button -->
-        <button class="sidebar-toggle-btn" @click="openSidebar">
+        <button class="sidebar-toggle-btn" @click="toggleSidebar">
           <i class="bi bi-list"></i>
         </button>
 
         <router-link class="navbar-brand fw-bold" to="/">
-          <i class="bi bi-lightning-charge"></i>     My Vue App
+          <i class="bi bi-lightning-charge"></i> My Vue App
         </router-link>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -36,7 +36,7 @@
     </nav>
 
     <!-- Sidebar -->
-    <Sidebar ref="sidebarRef" />
+    <Sidebar ref="sidebarRef" :isOpen="sidebarOpen" @toggle="toggleSidebar" />
 
     <!-- Main Content -->
     <div class="content">
@@ -49,30 +49,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import Sidebar from "@/layouts/Sidebar.vue";
-import Footer from "./Footer.vue";
-import { useAuthStore } from "@/store/authStore";
-
-const sidebarRef = ref(null);
-const authStore = useAuthStore();
-const sidebarOpen = ref(false);
-
-function openSidebar() {
-  sidebarOpen.value = !sidebarOpen.value;
-  if (sidebarRef.value) {
-    sidebarRef.value.toggleSidebar();
-  }
-}
-
-/* Ensure Sidebar Button Resets Correctly */
-watch(authStore, () => {
-  sidebarOpen.value = false; // Reset sidebar state when logging in/out
-});
-</script>
-
-
-<!-- <script setup>
 import { ref } from "vue";
 import Sidebar from "@/layouts/Sidebar.vue";
 import Footer from "./Footer.vue";
@@ -80,18 +56,20 @@ import { useAuthStore } from "@/store/authStore";
 
 const sidebarRef = ref(null);
 const authStore = useAuthStore();
+const sidebarOpen = ref(true);
 
-const openSidebar = () => {
-  sidebarRef.value.toggleSidebar();
-};
-</script> -->
+function toggleSidebar() {
+  sidebarOpen.value = !sidebarOpen.value;
+}
+</script>
 
 <style scoped>
-/* Main Layout */
+/* Layout Container */
 .app-layout {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100vh;
+  transition: margin-left 0.3s ease-in-out;
 }
 
 /* Fixed Navbar */
@@ -101,41 +79,31 @@ const openSidebar = () => {
   z-index: 1002;
   background: #010911 !important;
   padding: 5px 15px;
-  transition: margin-left 0.3s ease-in-out;
 }
 
-/* Content Adjustments */
-.content {
-  margin-top: 56px;
-  padding: 20px;
-  flex-grow: 1;
-  transition: margin-left 0.3s ease-in-out;
-}
+/* Sidebar Toggle Button */
 .sidebar-toggle-btn {
-  position: fixed;
+  /* position: fixed; */
   left: 10px;
   top: 10px;
-  z-index: 1003; /* Ensure it's above the sidebar */
+  right: auto;
+  z-index: 1003;
   background: transparent;
   border: none;
   color: white;
   font-size: 24px;
   cursor: pointer;
 }
-/* When Sidebar is Open */
-.sidebar.open + .content {
-  margin-left: 200px; /* Shift content when sidebar is open */
+
+/* Main Content */
+.content {
+  flex-grow: 1;
+  padding: 50px;
+  transition: margin-left 0.3s ease-in-out;
 }
 
-/* Make Footer Thinner */
-.footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: #010911;
-  color: white;
-  text-align: center;
-  padding: 4px 0; /* Reduced padding to make it thin */
-  font-size: 12px;
+/* When Sidebar is Open, shift the content */
+.app-layout.sidebar-open .content {
+  margin-left: 220px;
 }
 </style>

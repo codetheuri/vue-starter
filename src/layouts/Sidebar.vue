@@ -1,12 +1,10 @@
 <template>
-  <div :class="['sidebar', { open: isSidebarOpen }]">
-    <button class="btn btn-outline-light close-btn" @click="toggleSidebar">
+  <div :class="['sidebar', { open: isOpen }]">
+    <button class="btn btn-outline-light close-btn" @click="$emit('toggle')">
       <i class="bi bi-x-lg"></i>
     </button>
 
     <ul class="list-unstyled mt-4">
-     
-
       <!-- 🔻 Dropdown for Vue Concepts -->
       <li>
         <button class="sidebar-link dropdown-btn" @click="toggleDropdown">
@@ -45,36 +43,28 @@
               <i class="bi bi-arrow-right-circle"></i> API Fetch (Users)
             </router-link>
           </li>
-       
         </ul>
-        <li>
-            <router-link class="sidebar-link" to="/banners">
-              <i class="bi bi-arrow-right-book"></i> Banners
-            </router-link>
-          </li>
+      </li>
+      <li>
+        <router-link class="sidebar-link" to="/banners">
+          <i class="bi bi-arrow-right-book"></i> Banners
+        </router-link>
       </li>
     </ul>
   </div>
 </template>
 
 <script setup>
-import { ref, defineExpose } from "vue";
+import { ref, defineProps } from "vue";
 
-const isSidebarOpen = ref(true); // Sidebar remains open by default
-const isDropdownOpen = ref(false); // Dropdown starts closed
+const isDropdownOpen = ref(true);
+const props = defineProps({
+  isOpen: Boolean,
+});
 
-// Toggle entire sidebar
-function toggleSidebar() {
-  isSidebarOpen.value = !isSidebarOpen.value;
-}
-
-// Toggle dropdown
 function toggleDropdown() {
   isDropdownOpen.value = !isDropdownOpen.value;
 }
-
-// Allow parent to call `toggleSidebar`
-defineExpose({ toggleSidebar });
 </script>
 
 <style scoped>
@@ -83,15 +73,17 @@ defineExpose({ toggleSidebar });
   position: fixed;
   left: 0;
   top: 0;
-  width: 220px; /* Reduced size */
+  width: 220px;
   height: 100%;
   background: #010911;
   color: white;
   padding: 15px;
+  transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
   z-index: 999;
 }
 
+/* Sidebar Open */
 .sidebar.open {
   transform: translateX(0);
 }

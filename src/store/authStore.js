@@ -11,42 +11,53 @@ export const useAuthStore = defineStore("auth", () => {
 
   // 🟢 Make `isAuthenticated` reactive based on token
   const isAuthenticated = computed(() => !!token.value);
+function setUser(userData, authToken) {
+    user.value = userData;
+    token.value = authToken;
+    isAuthenticated.value = true;
 
-  async function login(username, password) {
-    try {
-      const response = await axios.post("/v1/auth/login", {
-        username,
-        password,
-      });
-    const data = response.data?.dataPayload?.data;
-      if (data && data.token) {
-        user.value = {username: data.username};
-        token.value = data.token;
-        errorMessage.value = "";
 
-        // Store token & user data in localStorage
-        localStorage.setItem("token", token.value);
-        localStorage.setItem("user", JSON.stringify(user.value));
+localStorage.setItem("user", JSON.stringify(userData));
+localStorage.setItem("token", authToken);
+axios.defaults.headers.common["Authorization"] = `Bearer ${authToken}`;
 
-        // Set token in axios headers
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token.value}`;
+}
+  // async function login(username, password) {
+  //   try {
+  //     const response = await axios.post("/v1/auth/login", {
+  //       username,
+  //       password,
+  //     });
+  //   const data = response.data?.dataPayload?.data;
+  //     if (data && data.token) {
+  //       user.value = {username: data.username};
+  //       token.value = data.token;
+  //       errorMessage.value = "";
 
-        console.log("✅ Login Successful! Redirecting...");
+  //       // Store token & user data in localStorage
+  //       localStorage.setItem("token", token.value);
+  //       localStorage.setItem("user", JSON.stringify(user.value));
+
+  //       // Set token in axios headers
+  //       axios.defaults.headers.common["Authorization"] = `Bearer ${token.value}`;
+
+  //       console.log("✅ Login Successful! Redirecting...");
         
-        // 🔥 Use `$nextTick()` to ensure UI updates first before redirection
-        await router.push("/");
-      } else {
-        errorMessage.value = response.data.message || "Invalid credentials";
-      }
-    } catch (error) {
-      errorMessage.value = "An error occurred while logging in";
-      console.error("Login Error:", error);
-    }
-  }
+  //       // 🔥 Use `$nextTick()` to ensure UI updates first before redirection
+  //       await router.push("/");
+  //     } else {
+  //       errorMessage.value = response.data.message || "Invalid credentials";
+  //     }
+  //   } catch (error) {
+  //     errorMessage.value = "An error occurred while logging in";
+  //     console.error("Login Error:", error);
+  //   }
+  // }
 
   function logout() {
     user.value = null;
     token.value = null;
+    isAuthenticated.value = false;
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     delete axios.defaults.headers.common["Authorization"];
@@ -54,5 +65,5 @@ export const useAuthStore = defineStore("auth", () => {
     router.push("/login");
   }
 
-  return { user, isAuthenticated, login, logout, errorMessage };
+  return { user, isAuthenticated, token, logout, errorMessage, setUser };
 });
