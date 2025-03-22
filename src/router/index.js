@@ -19,7 +19,7 @@ const routes = [
     component: Food,
     meta: { requiresAuth: true }
   },
-  
+
   {
     path: "/login",
     component: () => import("@/views/Login.vue")
@@ -48,11 +48,11 @@ const routes = [
     path: "/watch",
     component: () => import("@/views/Temp.vue"),
     meta: { requiresAuth: true }
-  }, 
+  },
   {
     path: "/mount",
     component: () => import("@/views/Mount.vue"),
-    alias:"/mm",
+    alias: "/mm",
     meta: { requiresAuth: true }
   },
   {
@@ -60,7 +60,7 @@ const routes = [
     component: () => import("@/views/Users.vue"),
 
     meta: { requiresAuth: true },
-    children:[
+    children: [
       {
         path: "profile",
         // component: () => import("@/views/Profile.vue"),
@@ -79,7 +79,16 @@ const routes = [
   {
     path: "/banners",
     component: () => import("@/views/banners/Banners.vue"),
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
+    // children: [{
+    //   path: "add",
+    //   component: () => import("@/views/banners/AddBanner.vue")
+    // },]
+  },
+  {
+    path:"/banners/add",
+    component: () => import("@/views/banners/AddBanner.vue"),
+    meta: { requiresAuth: true },
   }
 ];
 
@@ -87,13 +96,13 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
- router.beforeEach((to, from , next)=>{
+router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  if(to.meta.requiresAuth && !authStore.isAuthenticated){
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next("/login");
   }
-  else{
+  else {
     next();
   }
- });
+});
 export default router;

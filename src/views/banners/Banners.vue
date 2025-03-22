@@ -2,7 +2,18 @@
   <Default>
     <div class="banners-list">
       <h2> Banners</h2>
+      <!-- <button @click="$router.push('/banners/add')" class="add-btn">
+      Add Banner
+    </button> -->
 
+
+    <button @click="openModal" class="add-btn">Add Banner</button>
+    <BannersModal :isOpen="isModalOpen" @close="closeModal" @bannerAdded="fetchBanners" />
+
+
+    <!-- Modal Component -->
+    <!-- <BannersModal :isOpen="isModalOpen" @close="closeModal" /> -->
+  
       <BaseTable
         :data="banners"
         :columns="columns"
@@ -14,7 +25,8 @@
       >
         <!-- Custom column slot for images -->
         <template #image_url="{ row }">
-          <img :src="row.image_url" alt="Banner Image" class="banner-img" />
+          <!-- <img :src="row.image_url" alt="Banner Image" class="banner-img" /> -->
+          <img v-if="row.image_url" :src="getImageUrl(row.image_url)" alt="Banner Image" class="banner-img" />
         </template>
 
         <!-- Actions column -->
@@ -32,10 +44,19 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import BaseTable from "@/components/BaseTable.vue";
 import Default from "@/layouts/Default.vue";
-
+import { useRouter } from "vue-router";
+import BannersModal from "@/components/BannersModal.vue";
+const router  = useRouter();
 const banners = ref([]);
 const currentPage = ref(1);
 const totalPages = ref(1);
+const isModalOpen = ref(false);
+function openModal() {
+  isModalOpen.value = true;
+}
+function closeModal() {
+  isModalOpen.value = false;
+}
 
 const columns = [
   { key: "id", label: "ID", sortable: true },
@@ -56,6 +77,7 @@ async function fetchBanners(page = 1, search = "") {
     });
     banners.value = response.data.dataPayload.data;
     totalPages.value = response.data.dataPayload.totalPages;
+    // closeModal();
   } catch (error) {
     console.error("🚨 Error fetching banners:", error);
   }
@@ -72,6 +94,12 @@ function deleteBanner(id) {
 onMounted(() => {
   fetchBanners();
 });
+const getImageUrl = (imagePath) => {
+  if (imagePath.startsWith("http")) {
+    return imagePath; // Already a full URL
+  }
+  return `http://localhost/${imagePath}`;
+};
 </script>
 
 <style scoped>
@@ -85,5 +113,19 @@ onMounted(() => {
   width: 100px;
   height: auto;
   border-radius: 5px;
+}
+.add-btn {
+  background: #274bc1;
+
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.add-btn:hover {
+  background:#10ac84;
 }
 </style>
