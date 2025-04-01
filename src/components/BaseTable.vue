@@ -12,10 +12,12 @@
         <thead>
           <tr>
             <th
+            
               v-for="(col, index) in columns"
               :key="index"
               @click="col.sortable ? sortBy(col.key) : null"
               :class="{ sortable: col.sortable }"
+              :style="{width: columnwidth?.[col.key] || 'auto'}"
             >
               {{ col.label }}
               <span v-if="col.sortable">
@@ -27,7 +29,11 @@
         </thead>
         <tbody>
           <tr v-for="(row, index) in sortedData" :key="index">
-            <td v-for="(col, colIndex) in columns" :key="colIndex">
+            <td 
+            v-for="(col, colIndex) in columns" 
+            :key="colIndex"
+            :style="{width: columnwidth?.[col.key] || 'auto'}"
+            >
               <slot :name="col.key" :row="row">{{ row[col.key] }}</slot>
             </td>
             <td v-if="$slots.actions">
@@ -37,7 +43,7 @@
         </tbody>
       </table>
   
-      <div class="table-pagination">
+      <div v-if="pagenation" class="table-pagination">
         <button :disabled="currentPage === 1" @click="$emit('page-change', currentPage - 1)">⬅️ Prev</button>
         <p>Page {{ currentPage }} of {{ totalPages }}</p>
         <button :disabled="currentPage === totalPages" @click="$emit('page-change', currentPage + 1)">Next ➡️</button>
@@ -51,9 +57,13 @@
   const props = defineProps({
     data: Array,
     columns: Array,
+    columnwidth: Object,
     currentPage: Number,
     totalPages: Number,
     searchable: Boolean,
+    pagenation: Boolean,
+    visible: Boolean,
+
   });
   
   const searchQuery = ref("");
@@ -87,14 +97,16 @@
   <style scoped>
   .table-container {
     background: white;
-    padding: 20px;
+  
+    padding: 10px;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   }
   
   .table-search input {
-    width: 20%;
-    padding: 10px;
+    width: 100%;
+    max-width: 300px;
+    padding: 7px;
     margin-bottom: 10px;
     border-radius: 5px;
     border: 1px solid #ccc;
@@ -107,21 +119,35 @@
   
   .modern-table th,
   .modern-table td {
-    padding: 12px;
+  overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 5px;
     text-align: left;
     border-bottom: 1px solid #ddd;
   }
-  
+  .modern-table td{
+    max-width: 150px;
+  }
   .modern-table th.sortable {
     cursor: pointer;
     user-select: none;
   }
   
   .table-pagination {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     display: flex;
     justify-content: right;
     margin-top: 10px;
+  }
+  .table-pagination p {
+    margin: 0 10px;
+    font-style: bold;
+    /* font-size: 1.2rem; */
+    color: #000;
+    font-weight: 600;
+    font-family: 'Times New Roman', Times, serif;
+    align-self: center;
   }
   
   button {
@@ -138,15 +164,15 @@
   
   button:first-of-type {
   
-    border-radius: 20%;
-    background: #0e101d;
-    color: white;
+    /* border-radius: 20%; */
+    background: #ffffff;
+    color: rgb(0, 0, 0);
   }
   
   button:last-of-type {
     border-radius: 20%;
-    background: #0c101f;
-    color: white;
+    background: #ffffff;
+    color: rgb(0, 0, 0);
   }
   </style>
   

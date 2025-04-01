@@ -34,10 +34,11 @@
           </div>
           <p v-if="errorMessages.general" class="error">{{ errorMessages.general }}</p>
           <div class="modal-actions">
-          
+
 
             <button type="submit" :disabled="isLoading">
-              {{ isLoading ? "Uploading..." : "Add Banner" }}
+              {{ isLoading ? "Uploading..." :props.isEditing? "save changes" :"Add Banner" }}
+             
             </button>
 
           </div>
@@ -51,16 +52,61 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits,onMounted } from "vue";
+import { ref, defineProps, defineEmits, onMounted, watch, watchEffect, toRaw } from "vue";
 import axios from "axios";
 
-const props = defineProps(["isOpen"]);
+const props = defineProps({
+  isOpen: Boolean,
+  isEditing: Boolean,
+  bannerData: Object,
+});
 const emit = defineEmits(["close", "bannerAdded"]);
 
-const form = ref({ title: "", description: "", file: null });
+
+const form = ref({
+  title: "",
+  description: "",
+  file: null
+});
 const previewImage = ref(null);
 const isLoading = ref(false);
 const errorMessages = ref({ title: '', description: '', file: '', general: '' });
+const resetForm = () => {
+  form.value = { title: "", description: "", file: null };
+  errorMessages.value = { title: '', description: '', file: '', general: '' };
+  previewImage.value = null;
+};
+
+watchEffect(()=>{
+  if(props.isEditing && props.bannerData){
+    console.log("Received bannerData:", props.bannerData); 
+    form.value={
+      title: props.bannerData.title || "",
+      description: props.bannerData.description || "",
+      file: null
+    };
+    if (props.bannerData.image_url) {
+      previewImage.value = props.bannerData.image_url.startsWith("http")
+        ? props.bannerData.image_url
+        : `http://localhost/${props.bannerData.image_url}`;
+    }
+  }else {
+      // form.value = { title: "", description: "", file: null };
+      //   previewImage.value = null;
+      resetForm();
+    }
+
+  }
+);
+
+watch(() => props.isOpen, (newVal) => {
+  if (newVal ) {
+    if(!props.isEditing){
+      resetForm();
+    }
+  }
+})
+
 
 function triggerFileInput() {
   document.getElementById("file").click();
@@ -80,10 +126,19 @@ function handleFileUpload(event) {
 
 async function submitBanner() {
   errorMessages.value = { title: '', description: '', file: '', general: '' };
+  console.log("Submitting banner:", toRaw(form.value));  // ✅ Debugging
+  console.log("isEditing:", props.isEditing);
+  console.log("Banner Data:", toRaw(props.bannerData));
   // if (!form.value.file) {
   // errorMessages.value.file = "please select an image";
   //   return;
   // }
+  console.log("Submitting banner:", form.value, "isEditing:", props.isEditing);
+  if (props.isEditing && (!props.bannerData || !props.bannerData.id)) {
+    console.error("🔴 Invalid banner data:", props.bannerData);
+    errorMessages.value.general = "Invalid banner data";
+    return;
+  }
 
   isLoading.value = true;
   // errorMessages.value.general = "";
@@ -94,18 +149,23 @@ async function submitBanner() {
   formData.append("file", form.value.file);
 
   try {
-    await axios.post("/v1/library/banners", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-    alert("🎉 Banner added successfully!");
+    if (props.isEditing) {
+      await axios.post(`/v1/library/banners/${props.bannerData.id}?_method=PUT`, formData);
+      alert("🎉 Banner updated successfully!");
+    } else {
+      await axios.post("/v1/library/banners", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      alert("🎉 Banner added successfully!");
+    }
     emit("bannerAdded");
     closeModal();
     form.value = { title: "", description: "", file: null };
-    errorMessages.value = { title: '', description: '', file: '', general: '' };
+
     previewImage.value = null;
   } catch (error) {
     // console.error("🔴 Error adding banner:", error);
-   
+
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
       const errorDetails = error.response.data.errorPayload.errors;
       errorMessages.value.title = errorDetails.title || '';
@@ -121,11 +181,24 @@ async function submitBanner() {
 }
 
 function closeModal() {
+  errorMessages.value = { title: '', description: '', file: '', general: '' };
   emit("close");
 }
-onMounted(()=>{
-  submitBanner();
+watch(() => form.value.title, (newVal) => {
+  if (newVal.trim() !== "") {
+    errorMessages.value.title = "";
+  }
 });
+
+watch(() => form.value.description, (newVal) => {
+  if (newVal.trim() !== "") {
+    errorMessages.value.description = "";
+  }
+});
+
+onMounted(()=>{
+  resetForm();
+})
 
 </script>
 
@@ -133,7 +206,7 @@ onMounted(()=>{
 /* Modal Overlay */
 .modal-overlay {
   position: fixed;
-  padding-top: 20px;
+  padding-top: 0px;
   top: 0;
   left: 0;
   width: 100%;
@@ -149,11 +222,11 @@ onMounted(()=>{
 /* Modal Box */
 .modal-content {
   position: relative;
-  background: rgb(241, 241, 241);
+  background: rgb(239, 235, 235);
   padding: 20px;
   border-radius: 10px;
-  width: 400px;
-  max-height: 90vh;
+  width: 500px;
+  max-height: 100vh;
   flex-direction: column;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   animation: slideIn 0.3s ease-out;
@@ -161,9 +234,10 @@ onMounted(()=>{
 
 .modal-body {
   overflow-y: auto;
-  max-height: 60vh;
+  max-height: 100vh;
   /* Adjust based on needs */
   padding-right: 10px;
+  padding-left: 10px;
 }
 
 /* Close Button */
@@ -187,27 +261,27 @@ onMounted(()=>{
 /* Modal Title */
 .modal-title {
   text-align: center;
-  font-size: 22px;
-  margin-bottom: 20px;
+  font-size: 20px;
+  margin-bottom: 0px;
 }
 
 /* Form Inputs */
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 5px;
 }
 
 input,
 textarea {
   width: 100%;
-  padding: 10px;
+  padding: 5px;
   border: 1px solid #ddd;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 13px;
 }
 
 textarea {
   resize: none;
-  height: 80px;
+  height: 50px;
 }
 
 /* Custom File Upload Button */
@@ -233,8 +307,9 @@ textarea {
 
 /* Image Preview */
 .image-preview img {
-  max-width: 40%;
-  margin-top: 10px;
+  max-width: 50%;
+  max-height: 20%;
+  margin-top: 0px;
   /* margin-bottom: 20px; */
   /* max-height: 50%; */
   border-radius: 5px;
