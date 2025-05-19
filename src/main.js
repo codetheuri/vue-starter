@@ -12,8 +12,8 @@ import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import App from './App.vue';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import {faTrash, faEdit, faPlus, faEye, faEyeSlash, faUser, faUserPlus, faUserCheck, faUserTimes, faSignOutAlt, faSignInAlt, faUserCircle, faUserCog, faUserLock, faUserEdit, faUserMinus, faUserShield, faUserTag, faUserTie, } from '@fortawesome/free-solid-svg-icons';
-library.add(faTrash, faEdit, faPlus, faEye, faEyeSlash, faUser, faUserPlus, faUserCheck, faUserTimes, faSignOutAlt, faSignInAlt, faUserCircle, faUserCog, faUserLock, faUserEdit, faUserMinus, faUserShield, faUserTag, faUserTie, );
+import {faTrash,faRotateLeft, faEdit, faPlus, faEye, faEyeSlash, faUser, faUserPlus, faUserCheck, faUserTimes, faSignOutAlt, faSignInAlt, faUserCircle, faUserCog, faUserLock, faUserEdit, faUserMinus, faUserShield, faUserTag, faUserTie, } from '@fortawesome/free-solid-svg-icons';
+library.add(faTrash, faRotateLeft,faEdit, faPlus, faEye, faEyeSlash, faUser, faUserPlus, faUserCheck, faUserTimes, faSignOutAlt, faSignInAlt, faUserCircle, faUserCog, faUserLock, faUserEdit, faUserMinus, faUserShield, faUserTag, faUserTie, );
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);

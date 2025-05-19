@@ -9,11 +9,14 @@
         />
       </div>
       <table class="modern-table">
+     
+
         <thead>
+      
           <tr>
             <th
             
-              v-for="(col, index) in columns"
+              v-for="(col, index) in visibleColumns"
               :key="index"
               @click="col.sortable ? sortBy(col.key) : null"
               :class="{ sortable: col.sortable }"
@@ -28,9 +31,18 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(row, index) in sortedData" :key="index">
+          <tr v-if="sortedData.length ===0">
+            <td :colspan="visibleColumns.length + ($slots.actions ? 1 :0)" class="no-data">
+              No data available
+            </td>
+
+          </tr>
+          <tr  v-for="(row, index) in sortedData" 
+          :key="index"
+  
+          >
             <td 
-            v-for="(col, colIndex) in columns" 
+            v-for="(col, colIndex) in visibleColumns" 
             :key="colIndex"
             :style="{width: columnwidth?.[col.key] || 'auto'}"
             >
@@ -40,7 +52,7 @@
               <slot name="actions" :row="row"></slot>
             </td>
           </tr>
-        </tbody>
+        </tbody> 
       </table>
   
       <div v-if="pagenation" class="table-pagination">
@@ -52,7 +64,8 @@
   </template>
   
   <script setup>
-  import { ref, computed } from "vue";
+  // import { c } from "vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P";
+import { ref, computed } from "vue";
   
   const props = defineProps({
     data: Array,
@@ -69,7 +82,9 @@
   const searchQuery = ref("");
   const sortKey = ref("");
   const sortOrder = ref("asc");
-  
+  const visibleColumns= computed(() => {
+    return props.columns.filter(col => col.visible !== false);
+  });
   const sortBy = (key) => {
     if (sortKey.value === key) {
       sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
@@ -174,5 +189,12 @@
     background: #ffffff;
     color: rgb(0, 0, 0);
   }
+  .no-data {
+  text-align: center;
+  font-weight: bold;
+  color: #999;
+  padding: 10px;
+}
+
   </style>
   

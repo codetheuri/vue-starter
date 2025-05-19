@@ -50,6 +50,11 @@
           <i class="bi bi-arrow-right-book"></i> Banners
         </router-link>
       </li>
+      <li>
+        <router-link class="sidebar-link" to="/resources">
+          <i class="bi bi-arrow-right-book"></i> Resources
+        </router-link>
+      </li>
     </ul>
   </div>
 </template>

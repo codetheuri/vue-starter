@@ -21,7 +21,7 @@
             <div v-if="errorMessages.description" class="error">{{ errorMessages.description }}</div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group ">
             <label for="file">Upload Image</label>
             <input type="file" id="file" @change="handleFileUpload" accept="image/*" hidden />
             <button type="button" class="upload-btn" @click="triggerFileInput">📷 Choose Image</button>
@@ -29,19 +29,21 @@
             <div v-if="errorMessages.file" class="error">{{ errorMessages.file }}</div>
           </div>
 
-          <div v-if="previewImage" class="image-preview">
+          <div v-if="previewImage" class="image-preview-wrapper">
             <img :src="previewImage" alt="Preview" />
+            <button type="button" class="remove-img-btn" @click="removeImage">✖</button>
           </div>
-          <p v-if="errorMessages.general" class="error">{{ errorMessages.general }}</p>
+
           <div class="modal-actions">
 
 
             <button type="submit" :disabled="isLoading">
-              {{ isLoading ? "Uploading..." :props.isEditing? "save changes" :"Add Banner" }}
-             
+              {{ isLoading ? "Uploading..." : props.isEditing ? "save changes" : "Add Banner" }}
+
             </button>
 
           </div>
+          <p v-if="errorMessages.general" class="error">{{ errorMessages.general }}</p>
         </form>
       </div>
 
@@ -52,8 +54,9 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, onMounted, watch, watchEffect, toRaw } from "vue";
+import { ref, defineProps, defineEmits, getCurrentInstance, onMounted, watch, watchEffect, toRaw } from "vue";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const props = defineProps({
   isOpen: Boolean,
@@ -68,6 +71,8 @@ const form = ref({
   description: "",
   file: null
 });
+const toastPayload = ref('')
+const { proxy } = getCurrentInstance()
 const previewImage = ref(null);
 const isLoading = ref(false);
 const errorMessages = ref({ title: '', description: '', file: '', general: '' });
@@ -77,10 +82,10 @@ const resetForm = () => {
   previewImage.value = null;
 };
 
-watchEffect(()=>{
-  if(props.isEditing && props.bannerData){
-    console.log("Received bannerData:", props.bannerData); 
-    form.value={
+watchEffect(() => {
+  if (props.isEditing && props.bannerData) {
+    console.log("Received bannerData:", props.bannerData);
+    form.value = {
       title: props.bannerData.title || "",
       description: props.bannerData.description || "",
       file: null
@@ -90,18 +95,18 @@ watchEffect(()=>{
         ? props.bannerData.image_url
         : `http://localhost/${props.bannerData.image_url}`;
     }
-  }else {
-      // form.value = { title: "", description: "", file: null };
-      //   previewImage.value = null;
-      resetForm();
-    }
-
+  } else {
+    // form.value = { title: "", description: "", file: null };
+    //   previewImage.value = null;
+    resetForm();
   }
+
+}
 );
 
 watch(() => props.isOpen, (newVal) => {
-  if (newVal ) {
-    if(!props.isEditing){
+  if (newVal) {
+    if (!props.isEditing) {
       resetForm();
     }
   }
@@ -110,6 +115,11 @@ watch(() => props.isOpen, (newVal) => {
 
 function triggerFileInput() {
   document.getElementById("file").click();
+}
+function removeImage(){
+  form.value.file = null;
+  previewImage.value = null;
+  document.getElementById("file").value = null;
 }
 
 function handleFileUpload(event) {
@@ -147,17 +157,41 @@ async function submitBanner() {
   formData.append("title", form.value.title);
   formData.append("description", form.value.description);
   formData.append("file", form.value.file);
-
+  // let response;
   try {
     if (props.isEditing) {
-      await axios.post(`/v1/library/banners/${props.bannerData.id}?_method=PUT`, formData);
-      alert("🎉 Banner updated successfully!");
+      const response = await axios.post(`/v1/library/banners/${props.bannerData.id}?_method=PUT`, formData);
+      // console.log("reponse", response.data.toastPayload.toastTitle);
+      // const toastPayload = response.data.toastPayload;
+      if (response.data.toastPayload) {
+        toastPayload.value = response.data.toastPayload;
+        Swal.fire({
+          icon: toastPayload.value.toastTheme || 'success',
+          title: toastPayload.value.toastMessage || 'Success',
+          timer: 4000,
+          timerProgressBar: true,
+          showCancelButton: false,
+          showConfirmButton: true
+        });
+      }
     } else {
-      await axios.post("/v1/library/banners", formData, {
+      const response = await axios.post("/v1/library/banners", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert("🎉 Banner added successfully!");
+      console.log("response", response.data);
+      if (response.data.toastPayload) {
+        toastPayload.value = response.data.toastPayload;
+        Swal.fire({
+          icon: toastPayload.value.toastTheme || 'success',
+          title: toastPayload.value.toastMessage || 'Success',
+          timer: 4000,
+          timerProgressBar: true,
+          showCancelButton: false,
+          showConfirmButton: false
+        });
+      }
     }
+
     emit("bannerAdded");
     closeModal();
     form.value = { title: "", description: "", file: null };
@@ -165,7 +199,7 @@ async function submitBanner() {
     previewImage.value = null;
   } catch (error) {
     // console.error("🔴 Error adding banner:", error);
-
+    Swal.fire('Oops!', 'Something went wrong.', 'error');
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
       const errorDetails = error.response.data.errorPayload.errors;
       errorMessages.value.title = errorDetails.title || '';
@@ -196,9 +230,9 @@ watch(() => form.value.description, (newVal) => {
   }
 });
 
-onMounted(()=>{
-  resetForm();
-})
+// onMounted(() => {
+//   resetForm();
+// })
 
 </script>
 
@@ -209,6 +243,8 @@ onMounted(()=>{
   padding-top: 0px;
   top: 0;
   left: 0;
+  z-index: 1000;
+  max-width: 100%;
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.7);
@@ -225,8 +261,8 @@ onMounted(()=>{
   background: rgb(239, 235, 235);
   padding: 20px;
   border-radius: 10px;
-  width: 500px;
-  max-height: 100vh;
+  width: 50%;
+  max-height: 80vh;
   flex-direction: column;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   animation: slideIn 0.3s ease-out;
@@ -305,15 +341,7 @@ textarea {
   color: #333;
 }
 
-/* Image Preview */
-.image-preview img {
-  max-width: 50%;
-  max-height: 20%;
-  margin-top: 0px;
-  /* margin-bottom: 20px; */
-  /* max-height: 50%; */
-  border-radius: 5px;
-}
+/*
 
 /* Buttons */
 .modal-actions {
@@ -353,6 +381,41 @@ button[type="submit"]:disabled {
 
 .cancel-btn:hover {
   background: darkred;
+}
+.image-preview-wrapper {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto;
+  margin-top: 10px;
+}
+
+.image-preview-wrapper img {
+  max-width: 40%;
+  border-radius: 5px;
+  margin-left: 30%;
+  align-items: center !important;
+}
+
+/* Floating remove button */
+.remove-img-btn {
+  position: absolute;
+  /* top: 5px; */
+  /* right: ; */
+  /* background: rgba(220, 53, 69, 0.9); soft red */
+  color: rgb(243, 7, 7);
+  border: none;
+  /* padding: -4px 8px; */
+  padding-left: -50px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.remove-img-btn:hover {
+  color: #ddd;
+  background: rgba(176, 42, 55, 0.9);
+   border-radius: 100%;
 }
 
 /* Animations */

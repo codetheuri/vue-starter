@@ -27,5 +27,30 @@ npm run dev
 ```sh
 npm run build
 ```
+
 **hello**
 
+# heading 1
+
+## heading 2
+
+[link](https://madhowcabs.com)
+***
+
+![Image](https://avatars.githubusercontent.com/u/116286199?v=4)
+
+* list
+* list
+* list
+
+1. one 
+2. two
+3. three
+
+`this is the code` its inline
+
+```
+# code block
+
+print '3 backticks or'
+```

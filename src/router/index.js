@@ -86,6 +86,12 @@ const routes = [
     // },]
   },
   {
+    path: "/resources",
+    component: () => import("@/views/resources/Resources.vue"),
+    meta: { requiresAuth: true },
+
+  },
+  {
     path:"/banners/add",
     component: () => import("@/views/banners/AddBanner.vue"),
     meta: { requiresAuth: true },
